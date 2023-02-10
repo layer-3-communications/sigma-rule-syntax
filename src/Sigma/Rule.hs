@@ -69,6 +69,10 @@ data Modifier
   = EndsWith
   | Contains
   | StartsWith
+  | AllModifier
+    -- ^ The @all@ modifier. This is suffixed with the word modifier
+    -- to prevent a naming conflict with the @All@ data constructor
+    -- of @Quantity@.
   deriving (Eq,Ord)
 
 -- | The value used for a match. The Sigma specification is not
@@ -206,6 +210,7 @@ modsToText = foldr
           EndsWith -> "|endswith"
           StartsWith -> "|startswith"
           Contains -> "|contains"
+          AllModifier -> "|all"
      in enc <> acc
   ) T.empty
 
@@ -313,6 +318,7 @@ decodeModText = \case
   "endswith" -> Just EndsWith
   "startswith" -> Just StartsWith
   "contains" -> Just Contains
+  "all" -> Just AllModifier
   _ -> Nothing
 
 parseAllTokens :: Tokenize.Alex [Internal.Token]
