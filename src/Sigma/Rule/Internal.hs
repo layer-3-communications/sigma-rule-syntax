@@ -1,7 +1,7 @@
 module Sigma.Rule.Internal
   ( Condition(..)
-  , Quantity(..)
-  , SearchIdPattern(..)
+  , Connective(..)
+  , SearchPattern(..)
   , Token(..)
   ) where
 
@@ -28,17 +28,22 @@ data Condition
   = And Condition Condition -- Prec 4
   | Or Condition Condition -- Prec 3
   | Not Condition -- Prec 5
-  | Of Quantity SearchIdPattern
-  | Search SearchIdPattern
+  | Of Connective SearchPattern
+  | Reference SearchPattern
 
--- | Quantity in @1 of xyz@ and @all of xyz@ patterns. 
-data Quantity = One | All
+-- | The two logical connectives used in Sigma rules.
+-- When this appears in @x of y@ patterns, the values of @x@ should be
+-- interpreted as:
+--
+-- * 1: disjunction
+-- * all: conjunction
+data Connective = Conjunction | Disjunction
 
 -- | A pattern for matching search IDs. Technically, Sigma allows
 -- wildcards to show up anywhere in the pattern, but in practice,
 -- rule authors only put them at the end (e.g. @selection_*@).
 -- To simplify the design and use of this library, only the common
 -- case is supported.
-data SearchIdPattern
-  = SearchIdExact !Text
-  | SearchIdPrefix !Text
+data SearchPattern
+  = SearchExact !Text
+  | SearchPrefix !Text

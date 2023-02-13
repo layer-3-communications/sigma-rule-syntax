@@ -11,13 +11,15 @@ module Sigma.Rule
   , Literal(..)
   , Match(..)
   , Detection(..)
-  , Quantity(..)
   , Condition(..)
-  , SearchIdPattern(..)
+  , Connective(..)
+  , SearchPattern(..)
+  , Search(..)
   ) where
 
 import Prelude hiding (id)
 
+import Data.Foldable (foldl')
 import Data.Bifunctor (first)
 import Data.Aeson (FromJSON,FromJSONKey,ToJSON,(.:),(.=))
 import Data.Map (Map)
@@ -27,7 +29,7 @@ import Data.UUID (UUID)
 import Data.Vector (Vector)
 import Data.Foldable (foldlM)
 import Data.Int (Int64)
-import Sigma.Rule.Internal (Condition(..),SearchIdPattern(..),Quantity(..))
+import Sigma.Rule.Internal (Condition(..),SearchPattern(..),Connective(..))
 
 import qualified Data.Scientific as SCI
 import qualified Chronos as Chronos
@@ -184,18 +186,30 @@ instance FromJSON Detection where
       , searches
       }
 
+instance FromJSON Search where
+  parseJSON = parseSearch
+
 -- | This uses @{map-list}@ to encode everything even when
 -- it would be possible to use the @{field: value}@ scheme
 -- instead.
 instance ToJSON Detection where
   toJSON x = Aeson.object $
     ( "condition" .= encodeCondition 0 x.condition
-    ) : M.foldrWithKey (\k v acc -> encodeSearch k v : acc) [] x.searches
+    ) : M.foldrWithKey (\k v acc -> (Key.fromText k .= v) : acc) [] x.searches
 
-instance ToJSON Match where
-  toJSON m = Aeson.object
-    [ Key.fromText (m.field <> modsToText m.modifiers) .= m.values
-    ]
+-- instance ToJSON Match where
+--   toJSON m = Aeson.object
+--     [ Key.fromText (m.field <> modsToText m.modifiers) .= m.values
+--     ]
+
+instance ToJSON Search where
+  toJSON s = case s.connective of
+    Conjunction -> Aeson.toJSON $ foldl'
+      (\acc m -> M.insert (m.field <> modsToText m.modifiers) (Aeson.toJSON m.values) acc
+      ) M.empty s.matches
+    Disjunction -> Aeson.toJSON $ fmap 
+      (\m -> M.singleton (m.field <> modsToText m.modifiers) m.values)
+      s.matches
 
 instance ToJSON Literal where
   toJSON = \case
@@ -214,9 +228,6 @@ modsToText = foldr
      in enc <> acc
   ) T.empty
 
-encodeSearch :: Text -> Vector Match -> Aeson.Pair
-encodeSearch k matches = Key.fromText k .= matches
-
 encodeCondition :: Int -> Condition -> LT.Text
 encodeCondition !prec = \case
   And a b ->
@@ -228,9 +239,9 @@ encodeCondition !prec = \case
   Not a ->
     let x = "not " <> encodeCondition 5 a
      in parens (prec > 5) x
-  Search s -> encodeSearchIdPattern s
+  Reference s -> encodeSearchIdPattern s
   Of qty s ->
-    (case qty of {One -> "1"; All -> "all"})
+    (case qty of {Disjunction -> "1"; Conjunction -> "all"})
     <>
     " of "
     <>
@@ -239,10 +250,10 @@ encodeCondition !prec = \case
 parens :: Bool -> LT.Text -> LT.Text
 parens needed b = if needed then "(" <> b <> ")" else b
 
-encodeSearchIdPattern :: SearchIdPattern -> LT.Text
+encodeSearchIdPattern :: SearchPattern -> LT.Text
 encodeSearchIdPattern = \case
-  SearchIdExact t -> LT.fromStrict t
-  SearchIdPrefix p -> LT.fromStrict p <> "*"
+  SearchExact t -> LT.fromStrict t
+  SearchPrefix p -> LT.fromStrict p <> "*"
 
 parseCondition :: Aeson.Value -> Aeson.Parser Condition 
 parseCondition = Aeson.withText "Condition" $ \t ->
@@ -250,10 +261,10 @@ parseCondition = Aeson.withText "Condition" $ \t ->
     Left e -> fail e
     Right c -> pure c
 
-parseSearch :: Aeson.Value -> Aeson.Parser (Vector Match)
+parseSearch :: Aeson.Value -> Aeson.Parser Search
 parseSearch = \case
-  Aeson.Array v -> parseMatchesArray v
-  Aeson.Object m -> parseMatchesObject m
+  Aeson.Array v -> Search Disjunction <$> parseMatchesArray v
+  Aeson.Object m -> Search Conjunction <$> parseMatchesObject m
   _ -> fail "expected search to be array or object"
 
 parseMatchesObject :: KeyMap.KeyMap Aeson.Value -> Aeson.Parser (Vector Match)
@@ -330,12 +341,16 @@ parseAllTokens = do
       ts <- parseAllTokens
       pure (t : ts)
 
+data Search = Search
+  { connective :: !Connective
+    -- ^ What the Sigma spec calls @{map-list}@ means disjunction, and
+    -- what it calls @{field: value}@ means conjunction.
+  , matches :: !(Vector Match)
+  } 
+
 data Detection = Detection
   { condition :: !Condition
-  , searches :: !(Map Text (Vector Match))
-    -- ^ Sigma allows searches to be encoded in several ways. This library 
-    -- decodes a search from any of these schemes, but it does not preserve
-    -- information about which scheme was used.
+  , searches :: !(Map Text Search)
   }
 
 -- | In a yaml file, this can look like this

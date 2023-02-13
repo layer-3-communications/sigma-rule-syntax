@@ -58,12 +58,12 @@ Cond3
   | QuantityOf { $1 }
 
 QuantityOf
-  : one of ident { C.Of C.One (C.SearchIdExact $3) }
-  | all of ident { C.Of C.All (C.SearchIdExact $3) }
-  | one of prefix { C.Of C.One (C.SearchIdPrefix $3) }
-  | all of prefix { C.Of C.All (C.SearchIdPrefix $3) }
-  | ident { C.Search (C.SearchIdExact $1) }
-  | prefix { C.Search (C.SearchIdPrefix $1) }
+  : one of ident { C.Of C.Disjunction (C.SearchExact $3) }
+  | all of ident { C.Of C.Conjunction (C.SearchExact $3) }
+  | one of prefix { C.Of C.Disjunction (C.SearchPrefix $3) }
+  | all of prefix { C.Of C.Conjunction (C.SearchPrefix $3) }
+  | ident { C.Reference (C.SearchExact $1) }
+  | prefix { C.Reference (C.SearchPrefix $1) }
 
 {
 parseError :: [Token] -> Either String a

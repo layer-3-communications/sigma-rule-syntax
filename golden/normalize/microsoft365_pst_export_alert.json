@@ -4,23 +4,17 @@
     "description": "Alert on when a user has performed an eDiscovery search or exported a PST file from the search. This PST file usually has sensitive information including email body content",
     "detection": {
         "condition": "selection",
-        "selection": [
-            {
-                "eventName": [
-                    "eDiscovery search started or exported"
-                ]
-            },
-            {
-                "eventSource": [
-                    "SecurityComplianceCenter"
-                ]
-            },
-            {
-                "status": [
-                    "success"
-                ]
-            }
-        ]
+        "selection": {
+            "eventName": [
+                "eDiscovery search started or exported"
+            ],
+            "eventSource": [
+                "SecurityComplianceCenter"
+            ],
+            "status": [
+                "success"
+            ]
+        }
     },
     "id": "18b88d08-d73e-4f21-bc25-4b9892a4fdd0",
     "logsource": {
