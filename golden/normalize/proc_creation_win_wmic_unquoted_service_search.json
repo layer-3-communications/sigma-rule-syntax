@@ -1,0 +1,40 @@
+{
+    "author": "Nasreddine Bencherchali (Nextron Systems)",
+    "date": "2022/06/20",
+    "description": "Detects wmic known recon method to look for unquoted service paths, often used by pentest and attackers enum scripts",
+    "detection": {
+        "condition": "all of selection*",
+        "selection_cli": {
+            "CommandLine|contains": [
+                "name",
+                "displayname",
+                "pathname",
+                "startmode"
+            ],
+            "CommandLine|contains|all": [
+                " service ",
+                " get "
+            ]
+        },
+        "selection_img": [
+            {
+                "OriginalFileName": [
+                    "wmic.exe"
+                ]
+            },
+            {
+                "Image|endswith": [
+                    "\\WMIC.exe"
+                ]
+            }
+        ]
+    },
+    "id": "68bcd73b-37ef-49cb-95fc-edc809730be6",
+    "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+    },
+    "modified": "2022/06/20",
+    "status": "68bcd73b-37ef-49cb-95fc-edc809730be6",
+    "title": "WMIC Unquoted Services Path Lookup"
+}

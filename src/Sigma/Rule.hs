@@ -22,7 +22,7 @@ import Prelude hiding (id)
 
 import Data.Foldable (foldl')
 import Data.Bifunctor (first)
-import Data.Aeson (FromJSON,FromJSONKey,ToJSON,(.:),(.=))
+import Data.Aeson (FromJSON,FromJSONKey,ToJSON,(.:),(.:?),(.=))
 import Data.Map (Map)
 import Data.Set (Set)
 import Data.Text (Text)
@@ -117,7 +117,11 @@ instance FromJSON Rule where
     description <- m .: "description" 
     author <- m .: "author"
     date <- (m .: "date") >>= parserDate
-    modified <- (m .: "modified") >>= parserDate
+    modified <- (m .:? "modified") >>= \case
+      -- If the rule has never been modified, use the creation
+      -- date as the modified date.
+      Nothing -> pure date
+      Just v -> parserDate v
     logsource <- m .: "logsource"
     detection <- m .: "detection"
     pure Rule{title,id,status,description,author,date,modified,logsource,detection}
