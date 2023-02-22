@@ -72,6 +72,7 @@ data Modifier
   = EndsWith
   | Contains
   | StartsWith
+  | Base64Offset
   | AllModifier
     -- ^ The @all@ modifier. This is suffixed with the word modifier
     -- to prevent a naming conflict with the @All@ data constructor
@@ -229,6 +230,7 @@ modsToText = foldr
     let enc = case m of
           EndsWith -> "|endswith"
           StartsWith -> "|startswith"
+          Base64Offset -> "|base64offset"
           Contains -> "|contains"
           AllModifier -> "|all"
      in enc <> acc
@@ -334,6 +336,7 @@ decodeModText :: Text -> Maybe Modifier
 decodeModText = \case
   "endswith" -> Just EndsWith
   "startswith" -> Just StartsWith
+  "base64offset" -> Just Base64Offset
   "contains" -> Just Contains
   "all" -> Just AllModifier
   _ -> Nothing

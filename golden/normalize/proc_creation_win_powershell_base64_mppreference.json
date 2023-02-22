@@ -1,0 +1,42 @@
+{
+    "author": "Florian Roth (Nextron Systems)",
+    "date": "2022/03/04",
+    "description": "Detects base64 encoded \"MpPreference\" PowerShell cmdlet code that tries to modifies or tamper with Windows Defender AV",
+    "detection": {
+        "condition": "selection",
+        "selection": [
+            {
+                "CommandLine|contains|base64offset": [
+                    "Add-MpPreference ",
+                    "Set-MpPreference ",
+                    "add-mppreference ",
+                    "set-mppreference "
+                ]
+            },
+            {
+                "CommandLine|contains": [
+                    "QQBkAGQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgA",
+                    "EAZABkAC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIA",
+                    "BAGQAZAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAA",
+                    "UwBlAHQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgA",
+                    "MAZQB0AC0ATQBwAFAAcgBlAGYAZQByAGUAbgBjAGUAIA",
+                    "TAGUAdAAtAE0AcABQAHIAZQBmAGUAcgBlAG4AYwBlACAA",
+                    "YQBkAGQALQBtAHAAcAByAGUAZgBlAHIAZQBuAGMAZQAgA",
+                    "EAZABkAC0AbQBwAHAAcgBlAGYAZQByAGUAbgBjAGUAIA",
+                    "hAGQAZAAtAG0AcABwAHIAZQBmAGUAcgBlAG4AYwBlACAA",
+                    "cwBlAHQALQBtAHAAcAByAGUAZgBlAHIAZQBuAGMAZQAgA",
+                    "MAZQB0AC0AbQBwAHAAcgBlAGYAZQByAGUAbgBjAGUAIA",
+                    "zAGUAdAAtAG0AcABwAHIAZQBmAGUAcgBlAG4AYwBlACAA"
+                ]
+            }
+        ]
+    },
+    "id": "c6fb44c6-71f5-49e6-9462-1425d328aee3",
+    "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+    },
+    "modified": "2023/01/30",
+    "status": "c6fb44c6-71f5-49e6-9462-1425d328aee3",
+    "title": "Powershell Base64 Encoded MpPreference Cmdlet"
+}
