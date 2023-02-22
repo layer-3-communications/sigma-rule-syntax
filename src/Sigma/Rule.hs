@@ -1,4 +1,5 @@
 {-# language BangPatterns #-}
+{-# language DerivingStrategies #-}
 {-# language LambdaCase #-}
 {-# language OverloadedStrings #-}
 {-# language OverloadedRecordDot #-}
@@ -84,6 +85,7 @@ data Literal
   = String !Text
   | Number !Int64
   | Null
+  deriving stock (Eq)
 
 instance FromJSON Status where
   parseJSON = Aeson.withText "Status" $ \t -> case t of
