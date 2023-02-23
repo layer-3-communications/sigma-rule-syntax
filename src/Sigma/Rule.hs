@@ -16,6 +16,7 @@ module Sigma.Rule
   , Connective(..)
   , SearchPattern(..)
   , Search(..)
+  , Level(..)
   ) where
 
 import Prelude hiding (id)
@@ -205,6 +206,7 @@ data Rule = Rule
   , level :: !Level
   }
 
+-- | Criticality of a triggered rule
 data Level
   = Informational
   | Low
