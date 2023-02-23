@@ -42,6 +42,7 @@
         }
     },
     "id": "a8322756-015c-42e7-afb1-436e85ed3ff5",
+    "level": "medium",
     "logsource": {
         "product": "zeek",
         "service": "dns"

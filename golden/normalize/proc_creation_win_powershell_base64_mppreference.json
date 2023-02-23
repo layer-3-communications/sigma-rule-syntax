@@ -32,6 +32,7 @@
         ]
     },
     "id": "c6fb44c6-71f5-49e6-9462-1425d328aee3",
+    "level": "high",
     "logsource": {
         "category": "process_creation",
         "product": "windows"

@@ -90,6 +90,7 @@
         }
     },
     "id": "ad1f4bb9-8dfb-4765-adb6-2a7cfb6c0f94",
+    "level": "medium",
     "logsource": {
         "category": "image_load",
         "product": "windows"

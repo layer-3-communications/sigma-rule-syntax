@@ -108,7 +108,25 @@ instance ToJSON Rule where
     , "modified" .= encodeDate r.modified
     , "detection" .= r.detection
     , "logsource" .= r.logsource
+    , "level" .= r.level
     ]
+
+instance ToJSON Level where
+  toJSON = \case
+    Informational -> Aeson.String "informational"
+    Low -> Aeson.String "low"
+    Medium -> Aeson.String "medium"
+    High -> Aeson.String "high"
+    Critical -> Aeson.String "critical"
+
+instance FromJSON Level where
+  parseJSON = Aeson.withText "Level" $ \m -> case m of
+    "informational" -> pure Informational
+    "low" -> pure Low
+    "medium" -> pure Medium
+    "high" -> pure High
+    "critical" -> pure Critical
+    _ -> fail "unrecognized level"
 
 instance FromJSON Rule where
   parseJSON = Aeson.withObject "Rule" $ \m -> do
@@ -125,7 +143,10 @@ instance FromJSON Rule where
       Just v -> parserDate v
     logsource <- m .: "logsource"
     detection <- m .: "detection"
-    pure Rule{title,id,status,description,author,date,modified,logsource,detection}
+    level <- m .:? "level" >>= \case
+      Nothing -> pure Informational
+      Just v -> pure v
+    pure Rule{title,id,status,description,author,date,modified,logsource,detection,level}
 
 instance FromJSONKey Logsource where
   fromJSONKey = Aeson.FromJSONKeyTextParser $ \t -> case t of
@@ -181,7 +202,15 @@ data Rule = Rule
   , modified :: !Chronos.Date
   , logsource :: !(Map Logsource Text)
   , detection :: !Detection
+  , level :: !Level
   }
+
+data Level
+  = Informational
+  | Low
+  | Medium
+  | High
+  | Critical
 
 instance FromJSON Detection where
   parseJSON = Aeson.withObject "Detection" $ \m -> do
