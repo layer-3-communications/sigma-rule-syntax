@@ -1,0 +1,37 @@
+{
+    "author": "Nasreddine Bencherchali (Nextron Systems)",
+    "date": "2022/09/27",
+    "description": "foo",
+    "detection": {
+        "condition": "all of selection_*",
+        "selection_extension": {
+            "CommandLine|contains": [
+                ".dmp",
+                ".dump",
+                ".hdmp"
+            ]
+        },
+        "selection_img": [
+            {
+                "Description|contains": [
+                    "7-Zip"
+                ]
+            },
+            {
+                "OriginalFileName": [
+                    "7z.exe",
+                    "7za.exe"
+                ]
+            }
+        ]
+    },
+    "id": "ec570e53-4c76-45a9-804d-dc3f355ff7a7",
+    "level": "medium",
+    "logsource": {
+        "category": "process_creation",
+        "product": "windows"
+    },
+    "modified": "2023/09/12",
+    "status": "ec570e53-4c76-45a9-804d-dc3f355ff7a7",
+    "title": "7Zip Compressing Dump Files"
+}

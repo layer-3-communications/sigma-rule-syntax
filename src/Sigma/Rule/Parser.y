@@ -62,8 +62,7 @@ QuantityOf
   | all of ident { C.Of C.Conjunction (C.SearchExact $3) }
   | one of prefix { C.Of C.Disjunction (C.SearchPrefix $3) }
   | all of prefix { C.Of C.Conjunction (C.SearchPrefix $3) }
-  | ident { C.Reference (C.SearchExact $1) }
-  | prefix { C.Reference (C.SearchPrefix $1) }
+  | ident { C.Reference $1 }
 
 {
 parseError :: [Token] -> Either String a
